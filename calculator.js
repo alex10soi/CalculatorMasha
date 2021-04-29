@@ -16,14 +16,15 @@ $(document).ready(() => {
     });
   });
 
-  //------------------------- Add copyright----------------------------
+  //------------------------- Add copyright ----------------------------
   const authorName = 'Aleksandr Saiko';
   let copyright = $('.footer_copyright').text() + ' ' + new Date().getFullYear();
   $('.footer_copyright').text(copyright + ' ' + authorName);
 
 
   // ---------------- Animates Calculator Buttons ----------------------
-  // The value of the button that was pressed by the user
+  // Checks the value of the button pressed by the user and invokes the 
+  // set action on it
   let btnValue;
   $('.btn').on('click', function(event) {
     if ($(event.target)[0].id == 'resultButton') {
@@ -64,6 +65,9 @@ $(document).ready(() => {
         $('#calc').val($('#calc').val() + btnValue);
         break;
       case 'C':
+        if(btnReset.attr('disabled') === 'disabled') {
+          break;
+        }
         $('#calc').val('');
         calc_response_1.fadeOut(2000);
         calc_response_2_pic_1.fadeOut(2000);
@@ -103,8 +107,7 @@ $(document).ready(() => {
   //Array of prepared results
   const myResults = [
     'Я люблю Тебя Машенька, этот результат можно и не пересчитывать',
-    'Я как калькулятор говорю: "Я все правильно посчитал:<br> \'Он Тебя любит\'"',
-    'Вы только посмотрите на нее, какая она красивая'
+    'Я как калькулятор говорю: "Я все правильно посчитал:<br> \'Он Тебя любит\'"'
   ];
 
   //Результаты блока 'miki знает результат'
@@ -120,14 +123,17 @@ $(document).ready(() => {
   const res_calc = $('.res');
   const calc_response_2_pic_1 = $('.calc_response_2-pic_1');
   const calc_response_1_result = $('.calc_response_1-result');
-  const calc_response_2_pic_2 = $('calc_response_2-pic_2');
   const mikiClever = $('.mikiClever');
+  // 'C' button on the calculator, which resets the result to the
+  // calculator screen.
+  const btnReset = $('#itemC'); 
+
 
   
   //Launches a calculator program
   function runApp() {
     const str = $('#calc').val();
-    const patt = /^([\-]?\d*([\.]{1}\d*)?)([+\-*\/]*\d*)*$/;
+    const patt = /^([\-]?\d*([\.]{1}\d*)?)([+\-*\/]*\d*([\.]{1}\d*)?)*$/;
     if (patt.test(str) && /[^\-+*\/]$/.test(str) && !(/(\-[*\/]{1,})|(\+[*\/]{1,})/.test(str))) {
       result = parsingStr(str);
       if (/\./.test(result)) {
@@ -158,17 +164,16 @@ $(document).ready(() => {
     //Selecting actions for the first three cycles of the Love Calculator mode
     switch (cyclesCalc) {
       case 0:
-        showResult();
-        break;
       case 1:
         showResult();
         break;
       case 2:
-        $('.calc_response_3-pic_3').fadeIn(1000, ()=>{
-          $('.calc_response_3-pic_2').fadeIn(1000, ()=>{
-            $('.calc_response_3-pic_1').fadeIn(1000, ()=>{
+        btnReset.attr('disabled', true);
+        $('.calc_response_3-pic_3').fadeIn(1000, ()=> {
+          $('.calc_response_3-pic_2').fadeIn(1000, ()=> {
+            $('.calc_response_3-pic_1').fadeIn(1000, ()=> {
               $('.calc_response_3-pic_5').fadeIn(1000);
-              $('.calc_response_3_opinion').fadeIn(1000);
+              $('.calc_response_3_opinion').fadeIn(1000, ()=> btnReset.attr('disabled', false));
               cyclesCalc++;
             });
           });
@@ -177,17 +182,19 @@ $(document).ready(() => {
       default:
         break;
     }
-
-
   }
 
   //Displays the results of the first two cycles of the LoveCulculator mode
   function showResult() {
+    btnReset.attr('disabled', true);
     mikiClever.fadeIn(1000).delay(6000).fadeOut(1000);
     setTimeout(()=> {
       calc_response_1.fadeIn(2000, () => {
       calc_response_1_result.fadeIn(3000, () => {
-        calc_response_2_pic_1.fadeIn(3500, () => cyclesCalc++);
+        calc_response_2_pic_1.fadeIn(3500, () => {
+          cyclesCalc++;
+          btnReset.attr('disabled', false);
+        });
       });
     });
     }, 7000);
